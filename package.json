@@ -1,0 +1,23 @@
+{
+  "name": "city-master",
+  "version": "1.0.0",
+  "description": "Simple Discord bot to play city game",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --experimental-modules core.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NickRimer03/city-master.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NickRimer03/city-master/issues"
+  },
+  "homepage": "https://github.com/NickRimer03/city-master#readme",
+  "dependencies": {
+    "discord.js": "^11.4.2"
+  }
+}

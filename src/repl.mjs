@@ -24,10 +24,22 @@ export default class Repl {
     }
   }
 
-  on({ author, channel, cmd, args }) {
+  on({ author, channel, cmd, args, text }) {
     switch (cmd) {
       case "c":
         this.emit("event--clear", { channel });
+        break;
+
+      case "start":
+        this.emit("event--start", { channel });
+        break;
+
+      case "stop":
+        this.emit("event--stop", { channel });
+        break;
+
+      case null:
+        this.emit("event--city", { channel, author, text });
         break;
     }
   }

@@ -1,0 +1,74 @@
+import { getRandom, degToDMS, firstLetterUp, getDistance } from "./utils";
+
+export default class Game {
+  constructor({ cityList }) {
+    this.totalDistance = 0;
+    this.cityList = cityList;
+    this.startCity = this.getRandomCity();
+    this.currentCity = this.startCity;
+    this.currentCoords = { la: this.startCity.la, lo: this.startCity.lo };
+    this.nextStartLetter = this.getStartLetter(this.getNameRu(this.startCity));
+    this.namedCities = [this.startCity];
+  }
+
+  getRandomCity() {
+    return this.cityList[getRandom(0, this.cityList.length - 1)];
+  }
+
+  getCity(cityname) {
+    return this.cityList.filter(({ a }) => a.includes(cityname));
+  }
+
+  getCurrentCoords() {
+    const { la, lo } = this.currentCoords;
+    const laText = la >= 0 ? "с.ш." : "ю.ш.";
+    const loText = lo >= 0 ? "в.д." : "з.д.";
+    const { d: dla, m: mla, s: sla } = degToDMS(Math.abs(la));
+    const { d: dlo, m: mlo, s: slo } = degToDMS(Math.abs(lo));
+
+    return `${dla}°${mla}′${Math.round(sla)}″ ${laText}, ${dlo}°${mlo}′${Math.round(slo)}″ ${loText}`;
+  }
+
+  getNameRu(city) {
+    return firstLetterUp(city.a[0]);
+  }
+
+  getStartLetter(cityname) {
+    const forbidden = ["ь", "ъ", "ы", " ", "-", "'"];
+    let i = 1;
+    let lastLetter = "";
+    do {
+      lastLetter = cityname[cityname.length - i++];
+    } while (forbidden.includes(lastLetter));
+
+    return lastLetter.toUpperCase();
+  }
+
+  checkCity({ usercity }) {
+    if (usercity[0] === this.nextStartLetter.toLowerCase()) {
+      const cities = this.getCity(usercity);
+      if (cities.length) {
+        if (!this.namedCities.includes(usercity)) {
+          this.namedCities.push(usercity);
+          const distances = [];
+          cities.forEach(city => {
+            distances.push(getDistance(this.currentCoords.la, this.currentCoords.lo, city.la, city.lo));
+          });
+          const rootDistance = Math.min(...distances);
+          const rootCity = cities[distances.indexOf(rootDistance)];
+          this.totalDistance += rootDistance;
+          this.nextStartLetter = this.getStartLetter(usercity);
+          this.currentCoords = { la: rootCity.la, lo: rootCity.lo };
+          this.currentCity = rootCity;
+          return { result: "ok", cities: cities.length, dist: rootDistance };
+        } else {
+          return { result: "already-named" };
+        }
+      } else {
+        return { result: "city-not-found" };
+      }
+    } else {
+      return { result: "first-letter-error" };
+    }
+  }
+}

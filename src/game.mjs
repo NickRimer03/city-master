@@ -2,13 +2,16 @@ import { getRandom, degToDMS, firstLetterUp, getDistance } from "./utils";
 
 export default class Game {
   constructor({ cityList }) {
-    this.totalDistance = 0;
+    this.timeout = null;
+    this.TIMEOUT = 20000;
+    this.totalDistance = { bot: 0, hero: 0 };
     this.cityList = cityList;
     this.startCity = this.getRandomCity();
     this.currentCity = this.startCity;
     this.currentCoords = { la: this.startCity.la, lo: this.startCity.lo };
     this.nextStartLetter = this.getStartLetter(this.getNameRu(this.startCity));
     this.namedCities = [this.startCity];
+    this.isBotTurn = false;
   }
 
   getRandomCity() {
@@ -56,7 +59,7 @@ export default class Game {
           });
           const rootDistance = Math.min(...distances);
           const rootCity = cities[distances.indexOf(rootDistance)];
-          this.totalDistance += rootDistance;
+          this.totalDistance.hero += rootDistance;
           this.nextStartLetter = this.getStartLetter(usercity);
           this.currentCoords = { la: rootCity.la, lo: rootCity.lo };
           this.currentCity = rootCity;
@@ -70,5 +73,24 @@ export default class Game {
     } else {
       return { result: "first-letter-error" };
     }
+  }
+
+  botTurn() {
+    this.isBotTurn = true;
+
+    let cityname = "";
+    let city = null;
+    do {
+      city = this.getRandomCity();
+      cityname = city.a[0];
+    } while (cityname[0] !== this.nextStartLetter.toLowerCase() || this.namedCities.includes(cityname));
+    const distance = getDistance(this.currentCoords.la, this.currentCoords.lo, city.la, city.lo);
+    this.namedCities.push(cityname);
+    this.totalDistance.bot += distance;
+    this.nextStartLetter = this.getStartLetter(cityname);
+    this.currentCoords = { la: city.la, lo: city.lo };
+    this.currentCity = city;
+
+    return { cityname, distance };
   }
 }

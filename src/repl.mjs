@@ -24,9 +24,9 @@ export default class Repl {
     }
   }
 
-  on({ author, channel, cmd, args, text }) {
+  on({ author, channel, cmd, text }) {
     switch (cmd) {
-      case "c":
+      case "clrscr":
         this.emit("event--clear", { channel });
         break;
 

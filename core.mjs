@@ -3,7 +3,7 @@ import Config from "./config.json";
 import Repl from "./src/repl";
 import Game from "./src/game";
 import cityList from "./res/cities500.json";
-import { firstLetterUp } from "./src/utils.mjs";
+import { firstLetterUp, pluralization } from "./src/utils.mjs";
 
 const BOT_CITY_TIMEOUT = 4000;
 const Client = new Discord.Client();
@@ -21,8 +21,14 @@ repl.subscribe("event--start", ({ channel }) => {
     game = new Game({ cityList });
     const { startCity, getNameRu, nextStartLetter } = game;
     const channelText = [];
-    channelText.push(`Игра начинается в городе \`${getNameRu(startCity)}\` в координатах ${game.getCurrentCoords()}`);
-    channelText.push(`Называй следующий пункт путешествия на букву \`${nextStartLetter}\``);
+    channelText.push(
+      `Игра начинается в городе \`${getNameRu(
+        startCity
+      )}\` в координатах ${game.getCurrentCoords()}`
+    );
+    channelText.push(
+      `Называй следующий пункт путешествия на букву \`${nextStartLetter}\``
+    );
     channel.send(channelText.join("\n"));
     console.log("-- game: started --", startCity);
 
@@ -40,11 +46,15 @@ repl.subscribe("event--stop", ({ channel }) => {
     channelText.push("---");
     channelText.push("Игра остановлена");
     channelText.push("```Статистика игры:");
-    channelText.push(`Игроки прошли: ${Math.round(game.totalDistance.hero)} км`);
-    channelText.push(`Бот прошёл:    ${Math.round(game.totalDistance.bot)} км`);
+    channelText.push(`Игрок прошёл: ${Math.round(game.totalDistance.hero)} км`);
+    channelText.push(`Бот прошёл:   ${Math.round(game.totalDistance.bot)} км`);
     channelText.push("```");
     channel.send(channelText.join("\n"));
-    console.log(`-- game: stopped; hero: ${game.totalDistance.hero}, bot: ${game.totalDistance.bot} --`);
+    console.log(
+      `-- game: stopped; hero: ${game.totalDistance.hero}, bot: ${
+        game.totalDistance.bot
+      } --`
+    );
     game = null;
   }
 });
@@ -53,10 +63,16 @@ repl.subscribe("event--city", ({ channel, author, text }) => {
   const { result, cities, dist } = game.checkCity({ usercity: text });
   const channelText = [];
   if (result === "first-letter-error") {
-    channelText.push(`${author.username}: Название города должно начинаться с буквы \`${game.nextStartLetter}\``);
+    channelText.push(
+      `${author.username}: Название города должно начинаться с буквы \`${
+        game.nextStartLetter
+      }\``
+    );
     console.log(`-- game: first-letter-error -> ${text} --`);
   } else if (result === "city-not-found") {
-    channelText.push(`${author.username}: Город с именем ${firstLetterUp(text)} не найден`);
+    channelText.push(
+      `${author.username}: Город с именем ${firstLetterUp(text)} не найден`
+    );
     console.log(`-- game: city-not-found -> ${text} --`);
   } else if (result === "already-named") {
     channelText.push(`Город ${firstLetterUp(text)} уже был посещён ранее`);
@@ -64,27 +80,65 @@ repl.subscribe("event--city", ({ channel, author, text }) => {
   } else if (result === "ok") {
     Client.clearTimeout(game.timeout);
     if (cities === 1) {
-      channelText.push(`Путешествуем в город \`${firstLetterUp(text)}\` в координаты ${game.getCurrentCoords()}`);
+      channelText.push(
+        `Путешествуем в город \`${firstLetterUp(
+          text
+        )}\` в координаты ${game.getCurrentCoords()}`
+      );
       console.log(`-- game: travel to -> ${text} --`, game.currentCity);
     } else {
-      channelText.push(`Найдено ${cities} городов с именем \`${firstLetterUp(text)}\``);
-      channelText.push(`Путешествуем в ближайший в координаты ${game.getCurrentCoords()}`);
-      console.log(`-- game: ${cities} cities found. Travel to -> ${text} --`, game.currentCity);
+      channelText.push(
+        `${pluralization(
+          ["Найден", "Найдено", "Найдено"],
+          cities
+        )} ${cities} ${pluralization(
+          ["город", "города", "городов"],
+          cities
+        )} с именем \`${firstLetterUp(text)}\``
+      );
+      channelText.push(
+        `Путешествуем в ближайший в координаты ${game.getCurrentCoords()}`
+      );
+      console.log(
+        `-- game: ${cities} cities found. Travel to -> ${text} --`,
+        game.currentCity
+      );
     }
-    channelText.push(`Пройдено ${Math.round(dist)} км. Всего: ${Math.round(game.totalDistance.hero)} км`);
+    channelText.push(
+      `Пройдено ${Math.round(dist)} км. Всего: ${Math.round(
+        game.totalDistance.hero
+      )} км`
+    );
     channelText.push("---");
-    channelText.push(`Теперь мой ход! И я должен назвать город на букву \`${game.nextStartLetter}\``);
+    channelText.push(
+      `Теперь мой ход! И я должен назвать город на букву \`${
+        game.nextStartLetter
+      }\``
+    );
 
     const { distance, cityname } = game.botTurn();
     Client.setTimeout(() => {
       channelText.length = 0;
       channelText.push(
-        `Мы путешествуем в город \`${firstLetterUp(cityname)}\` в координаты ${game.getCurrentCoords()}`
+        `Мы путешествуем в город \`${firstLetterUp(
+          cityname
+        )}\` в координаты ${game.getCurrentCoords()}`
       );
-      channelText.push(`Я прошёл ${Math.round(distance)} км. Всего: ${Math.round(game.totalDistance.bot)} км`);
-      channelText.push(`Куда отправимся теперь? Называй город на букву \`${game.nextStartLetter}\``);
+      channelText.push(
+        `Я прошёл ${Math.round(distance)} км. Всего: ${Math.round(
+          game.totalDistance.bot
+        )} км`
+      );
+      channelText.push(
+        `Куда отправимся теперь? Называй город на букву \`${
+          game.nextStartLetter
+        }\``
+      );
       game.isBotTurn = false;
-      console.log(`-- game: bot turn. Travel to -> ${cityname} --`, game.currentCity);
+      console.log(
+        `-- game: bot turn. Travel to -> ${cityname} --`,
+        game.currentCity
+      );
       channel.send(channelText.join("\n"));
 
       game.timeout = Client.setTimeout(() => {

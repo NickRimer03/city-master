@@ -44,11 +44,18 @@ export default class Game {
       lastLetter = cityname[cityname.length - i++];
     } while (forbidden.includes(lastLetter));
 
-    return lastLetter.toUpperCase();
+    return ["е", "ё"].includes(lastLetter) ? "Е или Ё" : lastLetter.toUpperCase();
   }
 
   checkCity({ usercity }) {
-    if (usercity[0] === this.nextStartLetter.toLowerCase()) {
+    let condition = false;
+    if (this.nextStartLetter === "Е или Ё") {
+      condition = ["е", "ё"].includes(usercity[0]);
+    } else {
+      condition = usercity[0] === this.nextStartLetter.toLowerCase();
+    }
+
+    if (condition) {
       const cities = this.getCity(usercity);
       if (cities.length) {
         if (!this.namedCities.includes(usercity)) {
@@ -78,12 +85,18 @@ export default class Game {
   botTurn() {
     this.isBotTurn = true;
 
+    let condition = false;
     let cityname = "";
     let city = null;
     do {
       city = this.getRandomCity();
       cityname = city.a[0];
-    } while (cityname[0] !== this.nextStartLetter.toLowerCase() || this.namedCities.includes(cityname));
+      if (this.nextStartLetter === "Е или Ё") {
+        condition = !["е", "ё"].includes(cityname[0]);
+      } else {
+        condition = cityname[0] !== this.nextStartLetter.toLowerCase();
+      }
+    } while (condition || this.namedCities.includes(cityname));
     const distance = getDistance(this.currentCoords.la, this.currentCoords.lo, city.la, city.lo);
     this.namedCities.push(cityname);
     this.totalDistance.bot += distance;

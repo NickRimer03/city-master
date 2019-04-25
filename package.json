@@ -4,7 +4,7 @@
   "description": "Simple Discord bot to play city game",
   "main": "index.js",
   "scripts": {
-    "start": "node --experimental-modules core.mjs NTY3OTk1NDM2NjU3NTQxMTIw.XL4MhA.aB-zaX69TPodqm4ifbv_k6UgIJg"
+    "start": "node --experimental-modules core.mjs"
   },
   "repository": {
     "type": "git",

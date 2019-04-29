@@ -3,7 +3,7 @@ import { getRandom, degToDMS, firstLetterUp, getDistance } from "./utils";
 export default class Game {
   constructor({ cityList }) {
     this.timeout = null;
-    this.TIMEOUT = 20000;
+    this.TIMEOUT = 30000;
     this.totalDistance = { bot: 0, hero: 0 };
     this.cityList = cityList;
     this.startCity = this.getRandomCity();
